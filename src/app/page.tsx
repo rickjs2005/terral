@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { JourneyDriver } from "@/components/journey-driver";
 
 const WHATSAPP = "5533998779375";
@@ -12,6 +13,7 @@ const BLENDS = [
     body: "Xícara delicada e luminosa, pra quem gosta de café que parece chá de flor.",
     price: "R$ 46",
     sca: 87,
+    image: "/products/nascente.webp",
     tone: "border-leaf/40",
     bar: "from-leaf/70 to-leaf/10",
     dot: "#8a9b5c",
@@ -24,6 +26,7 @@ const BLENDS = [
     body: "O equilíbrio da casa: doçura de caramelo com acidez de laranja no final.",
     price: "R$ 42",
     sca: 85,
+    image: "/products/vertente.webp",
     tone: "border-copper/50",
     bar: "from-copper/80 to-copper/10",
     dot: "#b87333",
@@ -36,6 +39,7 @@ const BLENDS = [
     body: "Encorpado e intenso — feito pra atravessar leite, gelo e madrugadas.",
     price: "R$ 44",
     sca: 86,
+    image: "/products/vulcanico.webp",
     tone: "border-ember/40",
     bar: "from-ember/70 to-ember/10",
     dot: "#e25822",
@@ -223,6 +227,16 @@ export default function Home() {
                 aria-hidden
                 className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${blend.bar}`}
               />
+              <div className="relative -mx-7 -mt-7 mb-6 overflow-hidden">
+                <Image
+                  src={blend.image}
+                  alt={`Embalagem do café ${blend.name}`}
+                  width={760}
+                  height={1230}
+                  className="h-64 w-full object-cover object-[center_35%] transition-transform duration-500 group-hover:scale-[1.04]"
+                />
+                <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-coal-2 via-transparent to-transparent" />
+              </div>
               <div className="flex items-center gap-2">
                 <span
                   aria-hidden
@@ -282,6 +296,16 @@ export default function Home() {
             <span className="rounded-full border border-copper/40 bg-copper/10 px-4 py-1 text-xs tracking-[0.25em] text-copper-soft uppercase">
               Frete incluso · cancele quando quiser
             </span>
+            <div className="relative mt-8 w-full max-w-2xl overflow-hidden rounded-2xl border border-copper/20">
+              <Image
+                src="/products/trio.webp"
+                alt="Os três cafés da TERRAL — Nascente, Vertente e Vulcânico"
+                width={1800}
+                height={1005}
+                className="w-full"
+              />
+              <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-coal/60 to-transparent" />
+            </div>
           <p className="chapter-label mt-6">06 · Assinatura</p>
           <h2 className="mt-3 text-4xl font-semibold text-cream sm:text-5xl">Clube TERRAL</h2>
           <p className="mt-5 max-w-xl text-lg text-cream-dim">

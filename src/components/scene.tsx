@@ -35,6 +35,25 @@ const beanVertex = /* glsl */ `
   varying vec3 vNormal;
   varying vec3 vPos;
   varying float vCrease;
+  varying float vMottle;
+
+  float hash3(vec3 p) {
+    return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453);
+  }
+  float vnoise(vec3 p) {
+    vec3 i = floor(p);
+    vec3 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    float a = hash3(i);
+    float b = hash3(i + vec3(1.0, 0.0, 0.0));
+    float c = hash3(i + vec3(0.0, 1.0, 0.0));
+    float d = hash3(i + vec3(1.0, 1.0, 0.0));
+    float e = hash3(i + vec3(0.0, 0.0, 1.0));
+    float g = hash3(i + vec3(1.0, 0.0, 1.0));
+    float h = hash3(i + vec3(0.0, 1.0, 1.0));
+    float k = hash3(i + vec3(1.0, 1.0, 1.0));
+    return mix(mix(mix(a, b, f.x), mix(c, d, f.x), f.y), mix(mix(e, g, f.x), mix(h, k, f.x), f.y), f.z);
+  }
 
   void main() {
     vec3 pos = position;
@@ -61,6 +80,9 @@ const beanVertex = /* glsl */ `
     pos += dir * uExplode * (0.2 + aRand * 0.45);
     pos.y -= uExplode * uExplode * aRand * 0.5;
 
+    // manchas de torra irregular (2 oitavas, coords do modelo = estável)
+    vMottle = vnoise(position * 5.0) * 0.65 + vnoise(position * 13.0) * 0.35;
+
     vNormal = normalMatrix * normal;
     vPos = (modelViewMatrix * vec4(pos, 1.0)).xyz;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
@@ -74,6 +96,7 @@ const beanFragment = /* glsl */ `
   varying vec3 vNormal;
   varying vec3 vPos;
   varying float vCrease;
+  varying float vMottle;
 
   void main() {
     vec3 n = normalize(vNormal);
@@ -86,6 +109,8 @@ const beanFragment = /* glsl */ `
     // rim cobre — a assinatura visual da marca
     float rim = pow(1.0 - max(dot(n, viewDir), 0.0), 2.2);
     vec3 base = uColor * (0.32 + 0.78 * diff);
+    // torra nunca é uniforme: manchas sutis clareiam/escurecem a casca
+    base *= 0.88 + vMottle * 0.24;
     base *= 1.0 - vCrease * 0.55; // paredes do vinco mais escuras
     // pele prateada (silverskin) no CENTRO do vinco — o detalhe que faz
     // parecer grão de verdade
@@ -186,6 +211,62 @@ function Bean() {
         fragmentShader={beanFragment}
         uniforms={uniforms}
         transparent
+      />
+    </mesh>
+  );
+}
+
+/** Sombra de contato — ancora o grão no "chão" (salto grande de realismo). */
+function ContactShadow() {
+  const mesh = useRef<THREE.Mesh>(null);
+  const mat = useRef<THREE.ShaderMaterial>(null);
+  useFrame(() => {
+    const p = journey.value;
+    const m = mesh.current!;
+    // segue o X do grão (mesmas âncoras, só o eixo horizontal)
+    const anchors: [number, number][] = [
+      [0.08, 0],
+      [0.28, 1.35],
+      [0.53, -1.25],
+      [0.75, 1.2],
+      [0.92, 0],
+    ];
+    let ax = anchors[0][1];
+    for (let i = 0; i < anchors.length - 1; i++) {
+      const [pa, xa] = anchors[i];
+      const [pb, xb] = anchors[i + 1];
+      if (p >= pa && p <= pb) {
+        const t = (p - pa) / (pb - pa);
+        ax = xa + (xb - xa) * (t * t * (3 - 2 * t));
+        break;
+      }
+      if (p > pb) ax = xb;
+    }
+    m.position.x = ax;
+    const explode = chapterProgress(p, "moagem");
+    const cup = chapterProgress(p, "xicara");
+    const o = mat.current!.uniforms.uOpacity;
+    o.value = 0.5 * (1 - explode) * (1 - cup) + cup * 0.55; // xícara também tem sombra
+  });
+  return (
+    <mesh ref={mesh} position={[0, -1.55, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <planeGeometry args={[3.4, 2.2]} />
+      <shaderMaterial
+        ref={mat}
+        transparent
+        depthWrite={false}
+        uniforms={{ uOpacity: { value: 0.5 } }}
+        vertexShader={/* glsl */ `
+          varying vec2 vUv;
+          void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
+        `}
+        fragmentShader={/* glsl */ `
+          uniform float uOpacity; varying vec2 vUv;
+          void main(){
+            float d = length((vUv - 0.5) * vec2(1.2, 2.0));
+            gl_FragColor = vec4(vec3(0.0), smoothstep(0.5, 0.05, d) * uOpacity);
+          }
+        `}
       />
     </mesh>
   );
@@ -479,6 +560,7 @@ export default function Scene({ mobile }: { mobile: boolean }) {
       <ambientLight intensity={0.5} />
       <directionalLight position={[3, 4, 5]} intensity={1.4} color="#ffd9b0" />
       <Backdrop />
+      <ContactShadow />
       <Bean />
       <Smoke count={mobile ? 36 : 60} />
       <Embers count={mobile ? 24 : 40} />
