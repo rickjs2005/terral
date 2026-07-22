@@ -1,26 +1,87 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ===== TERRAL — tokens ===== */
+@theme {
+  --color-coal: #0d0a08; /* preto-café */
+  --color-coal-2: #16100c;
+  --color-copper: #b87333; /* cobre — acento */
+  --color-copper-soft: #d99a5b;
+  --color-cream: #f2e8dc; /* texto principal */
+  --color-cream-dim: #b8a893;
+  --color-leaf: #7a8b4c; /* grão cru */
+  --color-ember: #e25822; /* brasa */
+
+  --font-display: var(--font-display), Georgia, serif;
+  --font-sans: var(--font-sans), system-ui, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: auto; /* Lenis cuida do smooth em desktop */
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  background:
+    radial-gradient(90rem 60rem at 80% -20%, rgb(184 115 51 / 0.07), transparent 60%),
+    var(--color-coal);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-variation-settings: "SOFT" 40, "WONK" 0;
+}
+
+/* Grão de textura — mata o chapado dos fundos escuros. */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Rótulo mono de capítulo */
+.chapter-label {
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  color: var(--color-copper-soft);
+}
+
+/* Linha de cobre decorativa */
+.copper-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(184 115 51 / 0.8), transparent);
+}
+
+/* CTA WhatsApp com pulso de brasa */
+@keyframes ember-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgb(184 115 51 / 0.5),
+      0 0 28px -8px rgb(226 88 34 / 0.6);
+  }
+  50% {
+    box-shadow:
+      0 0 0 10px rgb(184 115 51 / 0),
+      0 0 36px -6px rgb(226 88 34 / 0.8);
+  }
+}
+.cta-ember {
+  animation: ember-pulse 2.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
