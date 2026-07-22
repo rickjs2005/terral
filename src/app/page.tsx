@@ -8,25 +8,34 @@ const BLENDS = [
     name: "NASCENTE",
     roast: "Torra clara",
     origin: "Caparaó · 1.400m",
-    notes: "Florais, mel e cítricos de manhã fria",
+    notes: ["Florais", "Mel", "Cítricos"],
+    body: "Xícara delicada e luminosa, pra quem gosta de café que parece chá de flor.",
     price: "R$ 46",
     tone: "border-leaf/40",
+    bar: "from-leaf/70 to-leaf/10",
+    dot: "#8a9b5c",
   },
   {
     name: "VERTENTE",
     roast: "Torra média",
     origin: "Mantiqueira de Minas · 1.200m",
-    notes: "Caramelo, nozes e casca de laranja",
+    notes: ["Caramelo", "Nozes", "Casca de laranja"],
+    body: "O equilíbrio da casa: doçura de caramelo com acidez de laranja no final.",
     price: "R$ 42",
     tone: "border-copper/50",
+    bar: "from-copper/80 to-copper/10",
+    dot: "#b87333",
   },
   {
     name: "VULCÂNICO",
     roast: "Torra escura",
     origin: "Cerrado Mineiro · 1.050m",
-    notes: "Chocolate amargo, caramelo queimado e fumo doce",
+    notes: ["Chocolate amargo", "Caramelo queimado", "Fumo doce"],
+    body: "Encorpado e intenso — feito pra atravessar leite, gelo e madrugadas.",
     price: "R$ 44",
     tone: "border-ember/40",
+    bar: "from-ember/70 to-ember/10",
+    dot: "#e25822",
   },
 ];
 
@@ -54,7 +63,10 @@ function Overlay({
       data-chapter={chapter}
       className="absolute inset-0 z-10 flex flex-col justify-center px-6 opacity-0 sm:px-16 lg:px-24"
     >
-      <div className={`flex max-w-xl flex-col gap-4 ${alignCls}`}>
+      <div className={`relative flex max-w-xl flex-col gap-4 ${alignCls}`}>
+        <span aria-hidden className="ghost-number -top-24 -left-10">
+          {label.slice(0, 2)}
+        </span>
         <p className="chapter-label">{label}</p>
         <h2 className="text-4xl leading-[1.05] font-semibold text-cream sm:text-5xl lg:text-6xl">
           {title}
@@ -89,8 +101,31 @@ export default function Home() {
           data-chapter="hero"
           className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center opacity-0"
         >
+          {[
+            { left: "18%", top: "30%", size: 3, dur: "9s", delay: "0s", drift: "16px", peak: 0.5 },
+            { left: "78%", top: "24%", size: 2, dur: "12s", delay: "2s", drift: "-12px", peak: 0.4 },
+            { left: "64%", top: "68%", size: 2, dur: "10s", delay: "4s", drift: "10px", peak: 0.45 },
+            { left: "30%", top: "72%", size: 2, dur: "13s", delay: "1.4s", drift: "-14px", peak: 0.35 },
+            { left: "86%", top: "56%", size: 3, dur: "11s", delay: "5.5s", drift: "12px", peak: 0.4 },
+          ].map((m, i) => (
+            <span
+              key={i}
+              aria-hidden
+              className="mote"
+              style={{
+                left: m.left,
+                top: m.top,
+                width: m.size,
+                height: m.size,
+                ["--mote-dur" as string]: m.dur,
+                ["--mote-delay" as string]: m.delay,
+                ["--mote-drift" as string]: m.drift,
+                ["--mote-peak" as string]: m.peak,
+              }}
+            />
+          ))}
           <p className="chapter-label mb-6">Torrefação artesanal · Minas Gerais</p>
-          <h1 className="text-[clamp(4rem,16vw,12rem)] leading-none font-bold tracking-tight text-cream">
+          <h1 className="title-gradient text-[clamp(4rem,16vw,12rem)] leading-none font-bold tracking-tight">
             TERRAL
           </h1>
           <p className="mt-6 max-w-md text-lg text-cream-dim">
@@ -162,16 +197,38 @@ export default function Home() {
           {BLENDS.map((blend) => (
             <article
               key={blend.name}
-              className={`group flex flex-col rounded-2xl border ${blend.tone} bg-coal-2/80 p-7 transition-transform hover:-translate-y-1.5`}
+              className={`group relative flex flex-col overflow-hidden rounded-2xl border ${blend.tone} bg-gradient-to-b from-coal-2 to-coal p-7 transition-all hover:-translate-y-1.5 hover:shadow-[0_20px_50px_-20px_rgb(184_115_51/0.35)]`}
             >
-              <p className="chapter-label">{blend.roast}</p>
-              <h3 className="mt-2 font-display text-3xl font-bold tracking-wide text-cream">
+              <div
+                aria-hidden
+                className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${blend.bar}`}
+              />
+              <div className="flex items-center gap-2">
+                <span
+                  aria-hidden
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: blend.dot }}
+                />
+                <p className="chapter-label">{blend.roast}</p>
+              </div>
+              <h3 className="mt-3 font-display text-4xl font-bold tracking-wide text-cream">
                 {blend.name}
               </h3>
               <p className="mt-1 text-sm text-copper-soft">{blend.origin}</p>
-              <p className="mt-4 flex-1 text-cream-dim">{blend.notes}</p>
-              <div className="mt-6 flex items-center justify-between">
-                <p className="font-display text-2xl text-cream">
+              <div className="mt-5 flex flex-wrap gap-2">
+                {blend.notes.map((note) => (
+                  <span
+                    key={note}
+                    className="rounded-full border border-cream/15 px-3 py-1 text-xs text-cream-dim"
+                  >
+                    {note}
+                  </span>
+                ))}
+              </div>
+              <p className="mt-4 flex-1 text-sm leading-relaxed text-cream-dim">{blend.body}</p>
+              <div className="copper-line mt-6 opacity-40" />
+              <div className="mt-5 flex items-center justify-between">
+                <p className="font-display text-3xl text-cream">
                   {blend.price}
                   <span className="ml-1 text-xs text-cream-dim">/250g</span>
                 </p>
@@ -179,7 +236,7 @@ export default function Home() {
                   href={wa(`Olá! Quero pedir o café ${blend.name} (${blend.roast}) da TERRAL.`)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-full border border-copper/60 px-4 py-2 text-sm text-copper-soft transition-colors group-hover:bg-copper group-hover:text-coal"
+                  className="rounded-full border border-copper/60 px-5 py-2.5 text-sm font-semibold text-copper-soft transition-colors group-hover:bg-copper group-hover:text-coal"
                 >
                   Pedir
                 </a>
@@ -191,8 +248,13 @@ export default function Home() {
 
       {/* ===== Clube ===== */}
       <section className="relative z-10 border-y border-copper/15 bg-coal-2/60 py-28">
-        <div className="mx-auto flex max-w-4xl flex-col items-center px-6 text-center">
-          <p className="chapter-label">06 · Assinatura</p>
+        <div className="mx-auto max-w-4xl px-6">
+          <div className="relative flex flex-col items-center overflow-hidden rounded-3xl border border-copper/30 bg-gradient-to-b from-coal-2 to-coal px-6 py-16 text-center sm:px-16">
+            <div aria-hidden className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-copper to-transparent" />
+            <span className="rounded-full border border-copper/40 bg-copper/10 px-4 py-1 text-xs tracking-[0.25em] text-copper-soft uppercase">
+              Frete incluso · cancele quando quiser
+            </span>
+          <p className="chapter-label mt-6">06 · Assinatura</p>
           <h2 className="mt-3 text-4xl font-semibold text-cream sm:text-5xl">Clube TERRAL</h2>
           <p className="mt-5 max-w-xl text-lg text-cream-dim">
             Todo mês, um microlote diferente torrado na semana do envio — com carta de origem,
@@ -207,6 +269,7 @@ export default function Home() {
           >
             Entrar pro clube
           </a>
+          </div>
         </div>
       </section>
 

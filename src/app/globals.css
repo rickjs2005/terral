@@ -44,6 +44,42 @@ h3 {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+/* Título com gradiente cobre→creme (assinatura tipográfica) */
+.title-gradient {
+  background: linear-gradient(115deg, var(--color-cream) 30%, var(--color-copper-soft) 65%, var(--color-copper) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Numeral fantasma gigante atrás dos títulos de capítulo */
+.ghost-number {
+  position: absolute;
+  z-index: -1;
+  font-family: var(--font-display);
+  font-size: clamp(10rem, 28vw, 22rem);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(184 115 51 / 0.16);
+  user-select: none;
+}
+
+/* Motes de poeira dourada subindo (CSS puro) */
+@keyframes mote {
+  0% { transform: translate3d(0, 16px, 0); opacity: 0; }
+  15% { opacity: var(--mote-peak, 0.5); }
+  60% { opacity: calc(var(--mote-peak, 0.5) * 0.5); }
+  100% { transform: translate3d(var(--mote-drift, 12px), -60px, 0); opacity: 0; }
+}
+.mote {
+  position: absolute;
+  border-radius: 9999px;
+  background: rgb(217 154 91 / 0.8);
+  filter: blur(1px);
+  animation: mote var(--mote-dur, 9s) linear infinite;
+  animation-delay: var(--mote-delay, 0s);
+}
+
 /* Rótulo mono de capítulo */
 .chapter-label {
   letter-spacing: 0.35em;

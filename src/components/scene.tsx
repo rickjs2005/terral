@@ -61,6 +61,7 @@ const beanVertex = /* glsl */ `
 const beanFragment = /* glsl */ `
   uniform vec3 uColor;
   uniform float uExplode;
+  uniform float uGloss; // óleo da torra: grão escuro brilha
   varying vec3 vNormal;
   varying vec3 vPos;
   varying float vCrease;
@@ -69,12 +70,16 @@ const beanFragment = /* glsl */ `
     vec3 n = normalize(vNormal);
     vec3 lightDir = normalize(vec3(0.6, 0.9, 0.7));
     float diff = max(dot(n, lightDir), 0.0);
-    // rim cobre — a assinatura visual da marca
     vec3 viewDir = normalize(-vPos);
-    float rim = pow(1.0 - max(dot(n, viewDir), 0.0), 2.4);
-    vec3 base = uColor * (0.35 + 0.75 * diff);
-    base *= 1.0 - vCrease * 0.45; // vinco mais escuro
-    base += vec3(0.72, 0.45, 0.2) * rim * 0.55;
+    // especular Blinn — o "óleo" aparece conforme torra (uGloss 0→1)
+    vec3 halfDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(n, halfDir), 0.0), mix(14.0, 60.0, uGloss)) * (0.15 + uGloss * 1.1);
+    // rim cobre — a assinatura visual da marca
+    float rim = pow(1.0 - max(dot(n, viewDir), 0.0), 2.2);
+    vec3 base = uColor * (0.32 + 0.78 * diff);
+    base *= 1.0 - vCrease * 0.5; // vinco mais escuro
+    base += vec3(0.72, 0.45, 0.2) * rim * 0.7;
+    base += vec3(1.0, 0.85, 0.65) * spec;
     float fade = 1.0 - smoothstep(0.15, 0.55, uExplode);
     gl_FragColor = vec4(base, fade);
   }
@@ -98,6 +103,7 @@ function Bean() {
     () => ({
       uTime: { value: 0 },
       uExplode: { value: 0 },
+      uGloss: { value: 0 },
       uColor: { value: new THREE.Color(RAW) },
     }),
     [],
@@ -110,8 +116,10 @@ function Bean() {
 
     const u = mat.current!.uniforms;
     u.uTime.value = state.clock.elapsedTime;
-    roastColor(chapterProgress(p, "torra"), color);
+    const roast = chapterProgress(p, "torra");
+    roastColor(roast, color);
     (u.uColor.value as THREE.Color).copy(color);
+    u.uGloss.value = roast * roast; // óleo aparece no fim da torra
     u.uExplode.value = chapterProgress(p, "moagem");
 
     const m = mesh.current!;
@@ -436,7 +444,7 @@ function Backdrop() {
             float d = length((vUv - vec2(0.5, 0.42)) * vec2(1.6, 1.0));
             vec3 ember = vec3(0.5, 0.16, 0.04) * uHeat;
             vec3 cream = vec3(0.35, 0.29, 0.22) * uCream;
-            float a = smoothstep(0.62, 0.0, d) * (0.22 + uHeat * 0.5 + uCream * 0.4);
+            float a = smoothstep(0.68, 0.0, d) * (0.3 + uHeat * 0.55 + uCream * 0.45);
             gl_FragColor = vec4(ember + cream + vec3(0.35, 0.2, 0.08), a * 0.6);
           }
         `}
