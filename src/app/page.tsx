@@ -11,6 +11,7 @@ const BLENDS = [
     notes: ["Florais", "Mel", "Cítricos"],
     body: "Xícara delicada e luminosa, pra quem gosta de café que parece chá de flor.",
     price: "R$ 46",
+    sca: 87,
     tone: "border-leaf/40",
     bar: "from-leaf/70 to-leaf/10",
     dot: "#8a9b5c",
@@ -22,6 +23,7 @@ const BLENDS = [
     notes: ["Caramelo", "Nozes", "Casca de laranja"],
     body: "O equilíbrio da casa: doçura de caramelo com acidez de laranja no final.",
     price: "R$ 42",
+    sca: 85,
     tone: "border-copper/50",
     bar: "from-copper/80 to-copper/10",
     dot: "#b87333",
@@ -33,6 +35,7 @@ const BLENDS = [
     notes: ["Chocolate amargo", "Caramelo queimado", "Fumo doce"],
     body: "Encorpado e intenso — feito pra atravessar leite, gelo e madrugadas.",
     price: "R$ 44",
+    sca: 86,
     tone: "border-ember/40",
     bar: "from-ember/70 to-ember/10",
     dot: "#e25822",
@@ -187,6 +190,23 @@ export default function Home() {
         </Overlay>
       </JourneyDriver>
 
+      {/* ===== Credibilidade (da semente à xícara) ===== */}
+      <div className="relative z-10 border-y border-copper/10 bg-coal-2/40">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-10 gap-y-3 px-6 py-6 text-center">
+          {[
+            "Microlotes 100% rastreados",
+            "Torra da semana, nunca de estoque",
+            "Cafés especiais SCA 84+",
+            "Envio em até 7 dias da torra",
+          ].map((item) => (
+            <p key={item} className="flex items-center gap-2 text-sm text-cream-dim">
+              <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-copper" />
+              {item}
+            </p>
+          ))}
+        </div>
+      </div>
+
       {/* ===== Blends ===== */}
       <section id="blends" className="relative z-10 mx-auto max-w-6xl px-6 py-28 sm:px-10">
         <p className="chapter-label">05 · Os cafés</p>
@@ -211,9 +231,17 @@ export default function Home() {
                 />
                 <p className="chapter-label">{blend.roast}</p>
               </div>
-              <h3 className="mt-3 font-display text-4xl font-bold tracking-wide text-cream">
-                {blend.name}
-              </h3>
+              <div className="mt-3 flex items-baseline justify-between gap-3">
+                <h3 className="font-display text-4xl font-bold tracking-wide text-cream">
+                  {blend.name}
+                </h3>
+                <span
+                  className="shrink-0 rounded-md border border-copper/40 px-2 py-1 font-mono text-[11px] tracking-wider text-copper-soft"
+                  title="Pontuação Specialty Coffee Association"
+                >
+                  SCA {blend.sca}
+                </span>
+              </div>
               <p className="mt-1 text-sm text-copper-soft">{blend.origin}</p>
               <div className="mt-5 flex flex-wrap gap-2">
                 {blend.notes.map((note) => (

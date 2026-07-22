@@ -38,15 +38,24 @@ const beanVertex = /* glsl */ `
 
   void main() {
     vec3 pos = position;
-    // achata em Y/Z pra virar formato de grão
-    pos.y *= 0.74;
-    pos.z *= 0.6;
-    // vinco: cava a frente (z>0) perto do plano x=0
-    float crease = smoothstep(0.22, 0.0, abs(pos.x)) * step(0.0, pos.z);
-    pos.z -= crease * 0.34;
-    vCrease = crease;
+    // proporções de grão: comprido no eixo Y, estreito em X, raso em Z
+    pos.x *= 0.78;
+    pos.y *= 1.02;
+    pos.z *= 0.66;
+    // face CHATA (a barriga do grão, z>0) — meia-elipse, não esfera
+    float front = smoothstep(0.0, 0.3, pos.z);
+    pos.z = mix(pos.z, pos.z * 0.34, front);
+    // vinco central em S ao longo do comprimento, só na face chata
+    float sCurve = sin(position.y * 1.7) * 0.09;
+    float groove = smoothstep(0.17, 0.02, abs(pos.x - sCurve)) * front;
+    pos.z -= groove * 0.24;
+    // pontas levemente pinçadas
+    float tip = smoothstep(0.55, 1.0, abs(position.y));
+    pos.x *= 1.0 - tip * 0.2;
+    pos.z *= 1.0 - tip * 0.14;
+    vCrease = groove;
     // casca irregular sutil
-    pos += normal * (sin(position.x * 9.0 + position.y * 7.0) * 0.012 + sin(position.y * 13.0) * 0.008);
+    pos += normal * (sin(position.x * 9.0 + position.y * 7.0) * 0.014 + sin(position.y * 13.0) * 0.009);
     // moagem: cada "caco" voa pra fora com queda
     vec3 dir = normalize(normal + vec3(0.0, aRand - 0.5, 0.0));
     pos += dir * uExplode * (0.2 + aRand * 0.45);
@@ -77,9 +86,13 @@ const beanFragment = /* glsl */ `
     // rim cobre — a assinatura visual da marca
     float rim = pow(1.0 - max(dot(n, viewDir), 0.0), 2.2);
     vec3 base = uColor * (0.32 + 0.78 * diff);
-    base *= 1.0 - vCrease * 0.5; // vinco mais escuro
+    base *= 1.0 - vCrease * 0.55; // paredes do vinco mais escuras
+    // pele prateada (silverskin) no CENTRO do vinco — o detalhe que faz
+    // parecer grão de verdade
+    float silver = smoothstep(0.55, 0.95, vCrease);
+    base += vec3(0.85, 0.76, 0.6) * silver * 0.5;
     base += vec3(0.72, 0.45, 0.2) * rim * 0.7;
-    base += vec3(1.0, 0.85, 0.65) * spec;
+    base += vec3(1.0, 0.85, 0.65) * spec * (1.0 - silver * 0.6);
     float fade = 1.0 - smoothstep(0.15, 0.55, uExplode);
     gl_FragColor = vec4(base, fade);
   }
@@ -123,9 +136,11 @@ function Bean() {
     u.uExplode.value = chapterProgress(p, "moagem");
 
     const m = mesh.current!;
-    // flutuação viva + giro lento; some na xícara
-    m.rotation.y = state.clock.elapsedTime * 0.25 + p * 4.2;
-    m.rotation.x = 0.35 + Math.sin(state.clock.elapsedTime * 0.5) * 0.08;
+    // oscila em vez de girar 360°: a face do vinco (a "cara" do grão)
+    // fica sempre voltada pra câmera — girar escondia a anatomia
+    m.rotation.y = -0.25 + Math.sin(state.clock.elapsedTime * 0.35) * 0.5 + p * 0.6;
+    m.rotation.x = 0.5 + Math.sin(state.clock.elapsedTime * 0.5) * 0.07;
+    m.rotation.z = -0.35;
     // âncoras por capítulo: hero embaixo do título; alterna o lado conforme
     // o texto (origem/moagem à esquerda ⇒ grão à direita; torra ao contrário)
     const anchors: [number, number, number][] = [
