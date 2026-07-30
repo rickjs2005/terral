@@ -1,115 +1,1239 @@
 @import "tailwindcss";
 
-/* ===== TERRAL — tokens ===== */
+/* ==========================================================================
+   TERRAL — sistema de design
+   A régua é editorial impressa, não "site": tipo fluido em vw, escala com
+   razão ~40:1 e NADA no meio, line-height 0.8 no display, e um lençol de
+   grão por cima de tudo pra matar o chapado da cor plana.
+   ========================================================================== */
+
 @theme {
-  --color-coal: #0d0a08; /* preto-café */
-  --color-coal-2: #16100c;
-  --color-copper: #b87333; /* cobre — acento */
-  --color-copper-soft: #d99a5b;
-  --color-cream: #f2e8dc; /* texto principal */
-  --color-cream-dim: #b8a893;
-  --color-leaf: #7a8b4c; /* grão cru */
-  --color-ember: #e25822; /* brasa */
+  /* --- matéria --- */
+  --color-coal: #0b0908; /* preto-café — nunca #000 */
+  --color-coal-2: #14100c;
+  --color-cream: #f5efe6; /* offwhite quente — nunca #fff */
+  --color-cream-dim: #a99a89;
+
+  /* --- o fio condutor: ouro velho de saca de café --- */
+  --color-gold: #c9b083;
+
+  /* --- acentos por capítulo --- */
+  --color-leaf: #8a9b5c; /* Caparaó */
+  --color-ochre: #c9a227; /* Terreiro */
+  --color-ember: #e25822; /* Tambor */
+  --color-copper: #b87333; /* Moenda */
+  --color-porcelain: #e8d9c2; /* Xícara */
 
   --font-display: var(--font-display), Georgia, serif;
   --font-sans: var(--font-sans), system-ui, sans-serif;
+
+  --ease-default: cubic-bezier(0.65, 0.05, 0, 1);
 }
 
+/* --------------------------------------------------------------------------
+   A raiz fluida. Acima de 992px 1rem === 1vw, então TODA medida em rem
+   (inclusive as do Tailwind) escala junto com a janela e a página respira
+   igual em qualquer monitor. Abaixo disso volta pra 16px e o layout vira
+   vertical — degrade, não tradução.
+   Nota: `rem` dentro de @media sempre resolve contra 16px, então os
+   breakpoints do Tailwind continuam intactos.
+   -------------------------------------------------------------------------- */
 html {
-  scroll-behavior: auto; /* Lenis cuida do smooth em desktop */
+  font-size: 16px;
+  scroll-behavior: auto; /* Lenis cuida do smooth */
+  -webkit-text-size-adjust: 100%;
 }
 
+@media (min-width: 992px) {
+  html {
+    font-size: 1vw;
+  }
+}
+
+/* O fundo nunca é cor chapada. Três luzes quase invisíveis — uma quente
+   caindo do alto, um bafo de cobre subindo da base, e o carvão — fazem o
+   preto ter atmosfera em vez de ser ausência. Ninguém "vê" isto; sente. */
 body {
   font-family: var(--font-sans);
   background:
-    radial-gradient(90rem 60rem at 80% -20%, rgb(184 115 51 / 0.07), transparent 60%),
+    radial-gradient(120rem 60rem at 50% -12%, rgb(201 176 131 / 0.05), transparent 60%),
+    radial-gradient(90rem 50rem at 82% 108%, rgb(184 115 51 / 0.045), transparent 55%),
     var(--color-coal);
+  color: var(--color-cream);
+  overscroll-behavior: none;
+}
+
+/* Barra de rolagem some — o Lenis é a única interface de scroll. */
+html,
+body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+/* O portão: nada rola enquanto o loader não liberar. */
+html[data-locked="true"],
+html[data-locked="true"] body {
+  overflow: hidden;
+  height: 100%;
 }
 
 h1,
 h2,
-h3 {
+h3,
+h4 {
   font-family: var(--font-display);
-  font-variation-settings: "SOFT" 40, "WONK" 0;
+  font-variation-settings: "SOFT" 20, "WONK" 1;
+  font-weight: 900;
+  line-height: 0.8;
+  letter-spacing: -0.02em;
 }
 
-/* Grão de textura — mata o chapado dos fundos escuros. */
-.grain::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  pointer-events: none;
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+::selection {
+  background: var(--color-gold);
+  color: var(--color-coal);
 }
 
-/* Título com gradiente cobre→creme (assinatura tipográfica) */
-.title-gradient {
-  background: linear-gradient(115deg, var(--color-cream) 30%, var(--color-copper-soft) 65%, var(--color-copper) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
+/* ==========================================================================
+   1. ESCALA TIPOGRÁFICA
+   Só existem estes degraus. A distância entre o maior e o menor é o que faz
+   a página ler como revista e não como site.
+   ========================================================================== */
 
-/* Numeral fantasma gigante atrás dos títulos de capítulo */
-.ghost-number {
-  position: absolute;
-  z-index: -1;
+.t-mega {
   font-family: var(--font-display);
-  font-size: clamp(10rem, 28vw, 22rem);
+  font-size: 24rem;
+  line-height: 0.72;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+}
+
+.t-giant {
+  font-family: var(--font-display);
+  font-size: 11rem;
+  line-height: 0.78;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+}
+
+.t-huge {
+  font-family: var(--font-display);
+  font-size: 6.4rem;
+  line-height: 0.82;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.t-big {
+  font-family: var(--font-display);
+  font-size: 3.6rem;
+  line-height: 0.86;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.t-lead {
+  font-size: 1.55rem;
+  line-height: 1.32;
+  font-weight: 300;
+  letter-spacing: -0.01em;
+}
+
+.t-body {
+  font-size: 1rem;
+  line-height: 1.55;
+  font-weight: 400;
+}
+
+.t-cap {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  font-weight: 500;
+  color: var(--color-cream-dim);
+}
+
+/* O degrau minúsculo: 900, caixa alta, entreletra aberta. É o contraponto
+   que faz o t-mega parecer gigante. */
+.t-micro {
+  font-size: 0.62rem;
   line-height: 1;
-  color: transparent;
-  -webkit-text-stroke: 1px rgb(184 115 51 / 0.16);
-  user-select: none;
-}
-
-/* Motes de poeira dourada subindo (CSS puro) */
-@keyframes mote {
-  0% { transform: translate3d(0, 16px, 0); opacity: 0; }
-  15% { opacity: var(--mote-peak, 0.5); }
-  60% { opacity: calc(var(--mote-peak, 0.5) * 0.5); }
-  100% { transform: translate3d(var(--mote-drift, 12px), -60px, 0); opacity: 0; }
-}
-.mote {
-  position: absolute;
-  border-radius: 9999px;
-  background: rgb(217 154 91 / 0.8);
-  filter: blur(1px);
-  animation: mote var(--mote-dur, 9s) linear infinite;
-  animation-delay: var(--mote-delay, 0s);
-}
-
-/* Rótulo mono de capítulo */
-.chapter-label {
-  letter-spacing: 0.35em;
+  font-weight: 900;
   text-transform: uppercase;
-  font-size: 0.7rem;
-  color: var(--color-copper-soft);
+  letter-spacing: 0.22em;
 }
 
-/* Linha de cobre decorativa */
-.copper-line {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgb(184 115 51 / 0.8), transparent);
+@media (max-width: 991px) {
+  .t-mega {
+    font-size: 28vw;
+  }
+  .t-giant {
+    font-size: 17vw;
+  }
+  .t-huge {
+    font-size: 3.1rem;
+  }
+  .t-big {
+    font-size: 2.1rem;
+  }
+  .t-lead {
+    font-size: 1.15rem;
+  }
+  .t-body {
+    font-size: 0.98rem;
+  }
+  .t-cap {
+    font-size: 0.85rem;
+  }
+  .t-micro {
+    font-size: 0.66rem;
+    letter-spacing: 0.2em;
+  }
 }
 
-/* CTA WhatsApp com pulso de brasa */
-@keyframes ember-pulse {
-  0%,
-  100% {
-    box-shadow:
-      0 0 0 0 rgb(184 115 51 / 0.5),
-      0 0 28px -8px rgb(226 88 34 / 0.6);
+/* A voz. Fraunces itálico com WONK ligado — usada em duas ou três palavras
+   por seção, nunca mais. É o sussurro editorial no meio da grotesca. */
+.voice {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-variation-settings: "SOFT" 55, "WONK" 1;
+  letter-spacing: 0.01em;
+}
+
+/* Dentro de um capítulo, a voz fala na cor do capítulo. */
+.chapter .voice {
+  color: var(--chapter-accent);
+}
+
+/* Numeral vazado — o recurso gráfico principal da casa.
+   A cor do traço vive em `--outline`, NÃO em `color`. Se dependesse de
+   `currentColor`, pintar o numeral de cobre exigiria setar `color`, e setar
+   `color` derruba o `transparent` — o numeral volta a ser sólido. Separar as
+   duas coisas é o que deixa cada capítulo escolher a própria cor de contorno. */
+.t-outline {
+  color: transparent;
+  -webkit-text-stroke: 0.085rem var(--outline, var(--color-cream));
+  paint-order: stroke fill;
+}
+
+@media (max-width: 991px) {
+  .t-outline {
+    -webkit-text-stroke-width: 1.5px;
+  }
+}
+
+/* Numerais tabulares pra estatística não dançar enquanto conta. */
+.t-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* ==========================================================================
+   2. MATÉRIA — o lençol de grão
+   Fica acima de tudo (z 100), não intercepta ponteiro, e é o que dá liga
+   entre foto, WebGL e cor plana: tudo passa pelo mesmo papel.
+   ========================================================================== */
+
+/* O ruído é DESSATURADO na origem (feColorMatrix saturate 0). Turbulência
+   crua sai colorida, e sobre um fundo quase preto isso vira chuvisco de TV
+   com franja roxa em vez de grão de filme.
+   Blend `normal`: em fundo escuro, `overlay` e `soft-light` preservam os
+   pretos — ou seja, some justamente onde o site inteiro vive. */
+.grain-sheet {
+  position: fixed;
+  /* -12% basta pro tremor de ±4%. Em -50% a camada vira 200vw × 200vh: numa
+     tela grande são ~25 MB de textura promovida, só pra ruído. */
+  inset: -12%;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0.14;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+  animation: grain-jitter 0.8s steps(1) infinite;
+}
+
+/* Tremor de projeção: 8 posições em passos secos. Sem isto o grão vira
+   textura de fundo; com isto vira filme. */
+@keyframes grain-jitter {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  12.5% {
+    transform: translate3d(-2%, -3%, 0);
+  }
+  25% {
+    transform: translate3d(-4%, 2%, 0);
+  }
+  37.5% {
+    transform: translate3d(2%, -4%, 0);
   }
   50% {
-    box-shadow:
-      0 0 0 10px rgb(184 115 51 / 0),
-      0 0 36px -6px rgb(226 88 34 / 0.8);
+    transform: translate3d(-1%, 3%, 0);
+  }
+  62.5% {
+    transform: translate3d(3%, 1%, 0);
+  }
+  75% {
+    transform: translate3d(-3%, -1%, 0);
+  }
+  87.5% {
+    transform: translate3d(1%, 4%, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
   }
 }
-.cta-ember {
-  animation: ember-pulse 2.8s ease-in-out infinite;
+
+/* Vinheta discreta — segura o olho no centro sem escurecer o miolo. */
+.vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgb(0 0 0 / 0.55) 100%);
+}
+
+/* ==========================================================================
+   3. REVEALS
+   O splitter injeta .line/.word/.char; o overflow-hidden mora na .line pra
+   letra subir de trás de uma máscara. O padding-top evita que o WONK do
+   Fraunces seja cortado por cima.
+   ========================================================================== */
+
+.split-line {
+  display: block;
+  overflow: hidden;
+  padding-top: 0.12em;
+  margin-top: -0.12em;
+}
+
+.split-word {
+  display: inline-block;
+  white-space: pre;
+}
+
+.split-char {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* Antes do GSAP assumir, o texto fica invisível — sem flash de conteúdo
+   já posicionado. `.is-ready` é ligado pelo motor de reveal. */
+[data-reveal]:not(.is-ready) .split-char,
+[data-reveal]:not(.is-ready) .split-word {
+  opacity: 0;
+}
+
+@media (max-width: 991px) {
+  /* No mobile o reveal por letra é caro e brigado com o INP: entrega o
+     texto pronto. */
+  [data-reveal]:not(.is-ready) .split-char,
+  [data-reveal]:not(.is-ready) .split-word {
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+   4. PRIMITIVES
+   ========================================================================== */
+
+.rule {
+  height: 1px;
+  width: 100%;
+  background: currentColor;
+  opacity: 0.28;
+}
+
+/* Regra que se desenha da esquerda no scroll. */
+.rule-draw {
+  transform-origin: left center;
+}
+
+.link-under {
+  position: relative;
+  display: inline-block;
+}
+.link-under::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -0.15em;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 0.735s var(--ease-default);
+}
+.link-under:hover::after {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+/* Botão sólido da casa. */
+.btn-solid {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75em;
+  padding: 1.1em 2.2em;
+  border-radius: 999px;
+  background: var(--color-cream);
+  color: var(--color-coal);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.68rem;
+  transition:
+    background 0.5s var(--ease-default),
+    color 0.5s var(--ease-default),
+    transform 0.5s var(--ease-default);
+}
+.btn-solid:hover {
+  background: var(--chapter-accent, var(--color-gold));
+  transform: translateY(-2px);
+}
+
+/* O botão respira: um halo morno que incha e recolhe num ciclo longo.
+   Amplitude mínima — a intenção é "vivo", nunca "olhe pra mim". */
+.btn-solid {
+  animation: btn-breathe 4.2s ease-in-out infinite;
+}
+@keyframes btn-breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(201 176 131 / 0), 0 6px 24px -12px rgb(201 176 131 / 0.25);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgb(201 176 131 / 0.05), 0 8px 30px -10px rgb(201 176 131 / 0.4);
+  }
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75em;
+  padding: 1.1em 2.2em;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.68rem;
+  transition:
+    background 0.5s var(--ease-default),
+    color 0.5s var(--ease-default);
+}
+.btn-ghost:hover {
+  background: currentColor;
+}
+.btn-ghost:hover > * {
+  color: var(--color-coal);
+}
+
+/* ==========================================================================
+   5. CAPÍTULOS HORIZONTAIS
+   Cada capítulo é uma faixa de ~350vw arrastada dentro de uma seção fixada.
+   ========================================================================== */
+
+.chapter {
+  position: relative;
+  overflow: hidden;
+  background: var(--chapter-bg);
+  color: var(--chapter-ink);
+}
+
+/* O poço de luz do capítulo: um clarão na cor do acento, descentrado, que
+   RESPIRA num ciclo de 9s. É o que impede o campo de cor de ser um retângulo
+   chapado — o fundo passa a ter um "onde" e um pulso, mesmo parado. */
+.chapter::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  background: radial-gradient(
+    55% 60% at 32% 30%,
+    color-mix(in srgb, var(--chapter-accent) 13%, transparent),
+    transparent 70%
+  );
+  animation: light-breathe 9s ease-in-out infinite;
+}
+
+/* E a vinheta do capítulo — segura as bordas escuras como num fotograma. */
+.chapter::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    130% 100% at 50% 45%,
+    transparent 60%,
+    color-mix(in srgb, var(--chapter-bg) 65%, #000 35%) 100%
+  );
+  opacity: 0.55;
+}
+
+/* O conteúdo da faixa fica acima das duas camadas. */
+.chapter-track,
+.chapter .sr-only {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes light-breathe {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+}
+
+/* Motes — a poeira dourada de cada capítulo, em CSS puro. Seis pontos
+   borrados subindo devagar já fazem o painel de abertura respirar; a cor
+   vem do acento do capítulo, então cada etapa tem a SUA poeira. */
+.mote {
+  position: absolute;
+  border-radius: 999px;
+  background: var(--chapter-accent, var(--color-gold));
+  filter: blur(1.5px);
+  opacity: 0;
+  animation: mote-rise var(--mote-dur, 11s) linear infinite;
+  animation-delay: var(--mote-delay, 0s);
+  pointer-events: none;
+}
+@keyframes mote-rise {
+  0% {
+    transform: translate3d(0, 2.4rem, 0);
+    opacity: 0;
+  }
+  18% {
+    opacity: var(--mote-peak, 0.4);
+  }
+  70% {
+    opacity: calc(var(--mote-peak, 0.4) * 0.4);
+  }
+  100% {
+    transform: translate3d(var(--mote-drift, 1rem), -5.5rem, 0);
+    opacity: 0;
+  }
+}
+
+/* Tinta do capítulo em três pesos. Existe porque o capítulo Xícara tem fundo
+   claro e inverte tudo: fixar `text-cream/70` em cada elemento faria o texto
+   sumir lá. `color-mix` mantém os três pesos derivados de UMA cor, então
+   trocar o tema do capítulo é trocar uma variável. */
+.ink {
+  color: var(--chapter-ink);
+}
+.ink-soft {
+  color: color-mix(in srgb, var(--chapter-ink) 68%, transparent);
+}
+.ink-faint {
+  color: color-mix(in srgb, var(--chapter-ink) 38%, transparent);
+}
+
+/* Sem `will-change` aqui de propósito: cada faixa tem ~380vw × 100vh, e
+   promover as cinco de uma vez são dezenas de milhões de pixels de camada
+   composta parados na GPU. O GSAP promove a faixa ativa enquanto ela anima e
+   solta depois — que é exatamente o comportamento que se quer. */
+.chapter-track {
+  display: flex;
+  height: 100svh;
+  width: max-content;
+}
+
+.panel {
+  position: relative;
+  height: 100svh;
+  width: 100vw;
+  flex: none;
+}
+
+/* O corredor não tem largura fixa: as paredes de mídia definem o tamanho e
+   o cálculo do pin lê o scrollWidth real — mudar um ato não quebra nada. */
+.panel-wide {
+  width: max-content;
+}
+
+/* SCRIM da legenda.
+   A legenda viaja por cima de FOTO, e foto muda de claro pra escuro dentro
+   do mesmo capítulo — nenhuma cor de texto sozinha resolve. Tentei halo na
+   cor do capítulo e virou borrão creme em volta das letras na Xícara (fundo
+   claro, fotos escuras). A saída é a de editorial: texto sempre claro, e uma
+   sombra suave POR TRÁS do bloco que garante contraste sobre qualquer foto.
+   Elipse borrada, não retângulo: retângulo lê como caixa de legenda. */
+.ch-headline,
+.ch-leadbox {
+  isolation: isolate;
+}
+.ch-headline::before,
+.ch-leadbox::before {
+  content: ;
+  position: absolute;
+  inset: -22% -14%;
+  z-index: -1;
+  background: radial-gradient(closest-side, rgb(8 6 5 / 0.66), transparent 76%);
+  filter: blur(18px);
+}
+.ch-headline .ch-head,
+.ch-leadbox .ch-lead {
+  text-shadow: 0 0.3rem 1.6rem rgb(8 6 5 / 0.5);
+}
+
+/* Parede de mídia: altura inteira, sem moldura. O que era galeria de
+   recortes virou cinema — uma foto gigante por ato, texto por cima. */
+.ch-wall {
+  position: relative;
+  flex: none;
+  height: 100%;
+  overflow: hidden;
+}
+.ch-wall img {
+  will-change: transform;
+}
+
+/* O painel de mídia é MAIS LARGO que a tela de propósito: sobra curso pra
+   foto continuar deslizando depois que o clip-path abre. Precisa ser classe,
+   não style inline — inline venceria o override do empilhamento mobile e a
+   página nasceria com 130vw de rolagem horizontal. */
+.panel-media {
+  width: 130vw;
+}
+
+/* Título e numeral dividem o mesmo centro óptico, separados por z e blend. */
+.stack-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* O `difference` faz o título inverter contra a mídia que passa por baixo —
+   e é desligado por capítulo onde a inversão embarra a cor. */
+.blend-diff {
+  mix-blend-mode: difference;
+}
+
+/* Cluster editorial: três recortes deitados, em tamanhos e alturas de linha
+   diferentes. A assimetria É a composição — três caixas iguais viravam
+   galeria de produto. */
+.ch-tile {
+  position: relative;
+  flex: none;
+  overflow: hidden;
+}
+/* Maiores e mais deslocados que a v1: no site rodando, os recortes tímidos
+   deixavam faixas mortas em cima e embaixo e o painel lia como slide vazio.
+   A tensão vem do tamanho descompensado + o eixo vertical quebrado. */
+.ch-tile img {
+  will-change: transform;
+}
+
+@media (max-width: 991px) {
+  .ch-cluster {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ch-wall {
+    width: 100% !important;
+    height: 64vw;
+  }
+}
+
+/* ==========================================================================
+   O PAINEL DA XÍCARA — papel, sol e tinta.
+   O capítulo claro ganha matéria própria: fibra de papel artesanal, manchas
+   de café quase invisíveis e um sol de fim de tarde entrando pela direita.
+   Nada disso existe nos capítulos escuros; é o contraste que fecha a jornada.
+   ========================================================================== */
+
+.chapter[data-chapter="xicara"] {
+  background:
+    /* fibras do papel — turbulência dessaturada, alpha baixíssimo */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.06'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E")
+      repeat,
+    /* manchas de xícara apoiada — três, fora de eixo */
+    radial-gradient(16rem 12rem at 16% 78%, rgb(138 74 28 / 0.05), transparent 62%),
+    radial-gradient(11rem 9rem at 71% 18%, rgb(138 74 28 / 0.04), transparent 60%),
+    radial-gradient(20rem 14rem at 88% 88%, rgb(138 74 28 / 0.045), transparent 65%),
+    var(--chapter-bg);
+}
+
+/* O sol pela janela: substitui o poço de luz genérico por um clarão que
+   VEM DA DIREITA, quente e alto — como luz de fim de tarde numa cozinha. */
+.chapter[data-chapter="xicara"]::before {
+  background:
+    radial-gradient(55% 75% at 92% 22%, rgb(255 199 116 / 0.5), transparent 62%),
+    linear-gradient(258deg, rgb(255 214 150 / 0.22) 0%, transparent 40%);
+  animation: light-breathe 11s ease-in-out infinite;
+}
+
+/* Ornamentos de tinta — cada capítulo desenha o SEU: contornos de montanha,
+   arcos de sol, espirais de calor, anéis de moenda, arabescos. A timeline
+   faz o traço (dash); aqui só o material, na cor do capítulo. */
+.ch-flourish {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.ch-flourish path {
+  fill: none;
+  stroke: var(--chapter-accent, #a5762e);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  opacity: 0.5;
+}
+
+/* O objeto da cena — recorte real pousado no painel, com sombra que o
+   ancora no campo. A POSIÇÃO é de cada capítulo (inline); aqui o material. */
+.x-cup {
+  position: absolute;
+  pointer-events: none;
+}
+.x-cup::before {
+  /* o chão: elipse de sombra + clarão do sol atrás */
+  content: "";
+  position: absolute;
+  inset: auto -20% -6% -20%;
+  height: 40%;
+  background: radial-gradient(50% 55% at 50% 60%, rgb(30 18 8 / 0.34), transparent 70%);
+  filter: blur(6px);
+}
+.x-cup img {
+  position: relative;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 1.4rem 2.2rem rgb(30 18 8 / 0.3));
+}
+
+/* Vapor — três véus subindo da xícara, cruzando as letras. */
+.steam-wisp {
+  position: absolute;
+  width: 8.5rem;
+  height: 20rem;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 252 244 / 0.65), transparent 70%);
+  filter: blur(13px);
+  opacity: 0;
+  animation: steam-rise var(--steam-dur, 8s) ease-in-out infinite;
+  animation-delay: var(--steam-delay, 0s);
+  pointer-events: none;
+}
+@keyframes steam-rise {
+  0% {
+    transform: translateY(3rem) scaleY(0.7) skewX(0deg);
+    opacity: 0;
+  }
+  30% {
+    opacity: var(--steam-peak, 0.5);
+  }
+  70% {
+    opacity: calc(var(--steam-peak, 0.5) * 0.5);
+    transform: translateY(-9rem) scaleY(1.1) skewX(-7deg);
+  }
+  100% {
+    transform: translateY(-16rem) scaleY(1.25) skewX(5deg);
+    opacity: 0;
+  }
+}
+
+/* Grãos em primeiro plano — recortes reais com desfoque de lente. A câmera
+   tem um vidro entre ela e a cena; é isso que dá profundidade de filme. */
+.x-bean {
+  position: absolute;
+  pointer-events: none;
+  will-change: transform;
+}
+.x-bean img {
+  width: 100%;
+  height: auto;
+}
+
+/* Índice da jornada na borda direita — onde se está, sem voltar à nav. */
+.x-index {
+  position: absolute;
+  right: 2.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+}
+
+/* --- atmosferas por capítulo ------------------------------------------- */
+
+/* Caparaó: névoa de manhã — duas faixas borradas derivando devagar. */
+.mist {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  height: 22vh;
+  background: linear-gradient(180deg, transparent, rgb(235 240 225 / 0.13), transparent);
+  filter: blur(18px);
+  animation: mist-drift var(--mist-dur, 26s) ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes mist-drift {
+  from {
+    transform: translateX(-4%);
+  }
+  to {
+    transform: translateX(4%);
+  }
+}
+
+/* Terreiro: o sol a pino — feixes quase invisíveis descendo do alto. */
+.sun-rays {
+  position: absolute;
+  inset: -20% -10% 0;
+  background: repeating-conic-gradient(
+    from 178deg at 50% -30%,
+    rgb(255 224 160 / 0.045) 0deg 1.6deg,
+    transparent 1.6deg 8deg
+  );
+  filter: blur(7px);
+  pointer-events: none;
+}
+
+/* Moenda: pó fino caindo — o inverso do mote que sobe. */
+.mote-fall {
+  position: absolute;
+  border-radius: 999px;
+  background: var(--chapter-accent, var(--color-gold));
+  filter: blur(1.5px);
+  opacity: 0;
+  animation: mote-drop var(--mote-dur, 9s) linear infinite;
+  animation-delay: var(--mote-delay, 0s);
+  pointer-events: none;
+}
+@keyframes mote-drop {
+  0% {
+    transform: translate3d(0, -3rem, 0);
+    opacity: 0;
+  }
+  15% {
+    opacity: var(--mote-peak, 0.4);
+  }
+  75% {
+    opacity: calc(var(--mote-peak, 0.4) * 0.5);
+  }
+  100% {
+    transform: translate3d(var(--mote-drift, 0.6rem), 6rem, 0);
+    opacity: 0;
+  }
+}
+
+/* Luz própria de cada campo — a direção conta a história do capítulo. */
+.chapter[data-chapter="caparao"]::before {
+  /* manhã fria descendo por cima da serra */
+  background:
+    radial-gradient(60% 55% at 24% 8%, rgb(220 236 205 / 0.22), transparent 65%),
+    linear-gradient(200deg, rgb(213 227 162 / 0.1) 0%, transparent 45%);
+}
+.chapter[data-chapter="terreiro"]::before {
+  /* sol a pino, quase branco no zênite */
+  background: radial-gradient(70% 55% at 50% -12%, rgb(255 226 158 / 0.4), transparent 65%);
+}
+.chapter[data-chapter="tambor"]::before {
+  /* a brasa vem de BAIXO — luz de fornalha */
+  background:
+    radial-gradient(65% 50% at 50% 108%, rgb(255 128 60 / 0.3), transparent 65%),
+    radial-gradient(40% 40% at 22% 90%, rgb(255 100 40 / 0.16), transparent 70%);
+}
+.chapter[data-chapter="moenda"]::before {
+  /* uma lâmpada de bancada, baixa e lateral */
+  background: radial-gradient(50% 65% at 8% 62%, rgb(224 164 104 / 0.26), transparent 65%);
+}
+
+/* Máscara de recorte da mídia: começa como um letterbox no meio da tela e
+   abre pra sangria total enquanto o horizontal está PARADO. */
+.media-clip {
+  clip-path: polygon(26% 36%, 74% 36%, 74% 58%, 26% 58%);
+}
+
+@media (max-width: 991px) {
+  .chapter-track {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .panel,
+  .panel-wide,
+  .panel-media {
+    width: 100%;
+    height: auto;
+    min-height: 100svh;
+  }
+  .media-clip {
+    clip-path: none;
+  }
+  .blend-diff {
+    mix-blend-mode: normal;
+  }
+}
+
+/* Linha de café: no hover acende um clarão interno na cor do próprio café —
+   vidro discreto, luz por dentro, sem virar cartão de e-commerce. */
+.coffee-row {
+  position: relative;
+  overflow: hidden; /* o numeral t-mega atravessa a linha e é cortado nela */
+}
+
+/* O numeral SCA gigante ao fundo da linha: vazado em repouso, e no hover
+   GANHA PREENCHIMENTO translúcido na cor do café — o quadro se completa. */
+.coffee-num {
+  position: absolute;
+  top: 50%;
+  right: 4%;
+  transform: translateY(-50%);
+  z-index: 0;
+  opacity: 0.4;
+  transition: color 0.8s var(--ease-default), opacity 0.8s var(--ease-default);
+  pointer-events: none;
+}
+.coffee-row:hover .coffee-num {
+  color: color-mix(in srgb, var(--chapter-accent, var(--color-gold)) 26%, transparent);
+  opacity: 0.6;
+}
+
+/* A embalagem inclina um fio no hover — objeto pego da prateleira,
+   não thumbnail. O zoom do miolo continua por conta do group-hover. */
+.coffee-pack {
+  transition: transform 0.8s var(--ease-default);
+}
+.coffee-row:hover .coffee-pack {
+  transform: rotate(1.8deg);
+}
+
+/* ==========================================================================
+   O SHOWCASE DOS CAFÉS — a embalagem como protagonista.
+   ========================================================================== */
+
+/* O nome gigante que a embalagem atravessa. Duas cópias idênticas: uma
+   atrás do pacote, uma na frente CLIPADA — só a metade de baixo das letras
+   passa por cima, e a profundidade aparece na hora. */
+.pack-name {
+  position: absolute;
+  /* 6svh: em 12svh a borda de cima do pacote cortava o miolo das letras.
+     O pacote deve cruzar a BASE do nome, nunca o meio. */
+  top: 6svh;
+  /* centrado por caixa (left/right + text-align), NUNCA por transform: o
+     parallax do GSAP escreve `transform` e apagaria um translateX(-50%). */
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 15.5rem;
+  line-height: 0.8;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.pack-name-front {
+  clip-path: inset(42% -6% -6% -6%);
+}
+
+/* A embalagem flutua — loop de 8s, amplitude mínima. "Parada" é o que
+   separa catálogo de vitrine. */
+.pack-float {
+  animation: pack-drift 8s ease-in-out infinite;
+}
+@keyframes pack-drift {
+  0%,
+  100% {
+    transform: rotate(-1.4deg) translateY(0);
+  }
+  50% {
+    transform: rotate(0.8deg) translateY(-0.9rem);
+  }
+}
+
+/* A foto do produto vira recorte com luz própria: a máscara radial apaga a
+   cena nas bordas e sobra o pacote no spotlight. */
+.pack-photo {
+  -webkit-mask: radial-gradient(78% 88% at 50% 50%, #000 52%, transparent 88%);
+  mask: radial-gradient(78% 88% at 50% 50%, #000 52%, transparent 88%);
+}
+
+/* O reflexo de vitrine — uma lâmina de luz que atravessa o pacote seguindo
+   o mouse (--shx é escrito pelo pointermove da cena). */
+.pack-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background: linear-gradient(
+    105deg,
+    transparent 42%,
+    rgb(255 235 200 / 0.22) 50%,
+    transparent 58%
+  );
+  transform: translateX(calc((var(--shx, 0.5) - 0.5) * 70%));
+  transition: transform 0.25s linear;
+}
+
+/* Botão de vitrine: um filete de luz PERCORRE a borda no hover, e o ímã
+   ganha 3% de escala (via --mgs, lida pelo transform do magnetismo). */
+.btn-lux {
+  position: relative;
+  isolation: isolate;
+}
+.btn-lux::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: 999px;
+  padding: 1.5px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 300deg,
+    var(--color-gold) 335deg,
+    transparent 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-default);
+}
+.btn-lux:hover::before {
+  opacity: 1;
+  animation: lux-sweep 1.4s linear infinite;
+}
+@keyframes lux-sweep {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.btn-lux:hover {
+  --mgs: 1.03;
+}
+
+/* Setas dos CTAs: deslizam meio passo no hover. */
+.btn-arrow {
+  display: inline-block;
+  transition: transform 0.5s var(--ease-default);
+}
+.btn-solid:hover .btn-arrow,
+.btn-ghost:hover .btn-arrow {
+  transform: translateX(0.35em);
+}
+
+/* Véu de virada: o fim de cada capítulo adota a cor do PRÓXIMO. A timeline
+   o acende só no último trecho do pin — a página "vira" em vez de trocar. */
+.chapter-veil {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 18svh;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(to bottom, transparent, var(--veil, transparent));
+}
+
+/* Marquee do rodapé — as palavras da casa passando devagar, em contorno.
+   Duas metades idênticas; -50% fecha o ciclo sem emenda visível. */
+.marquee {
+  overflow: hidden;
+  white-space: nowrap;
+}
+.marquee-track {
+  display: inline-flex;
+  animation: marquee-run 52s linear infinite;
+  will-change: transform;
+}
+.marquee-half {
+  padding-right: 3rem;
+}
+@keyframes marquee-run {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* O fio de progresso da jornada: 2px no topo, na cor do capítulo ativo
+   (background-color: currentColor acompanha o tween da nav de graça). */
+.nav-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 60;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  opacity: 0.85;
+  pointer-events: none;
+}
+.coffee-row::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(
+      50% 120% at 18% 50%,
+      color-mix(in srgb, var(--chapter-accent, var(--color-gold)) 10%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(rgb(245 239 230 / 0.02), rgb(245 239 230 / 0.02));
+  transition: opacity 0.7s var(--ease-default);
+}
+.coffee-row:hover::before {
+  opacity: 1;
+}
+
+/* Índice do manifesto: a linha desliza um passo no hover e o nome ganha um
+   fio de sublinhado na própria cor. Nada de fundo, nada de cartão. */
+.intro-row {
+  transition: transform 0.6s var(--ease-default);
+}
+.intro-row:hover {
+  transform: translateX(0.7rem);
+}
+.intro-row-name {
+  position: relative;
+  width: fit-content;
+}
+.intro-row-name::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -0.14em;
+  height: 2px;
+  width: 100%;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.6s var(--ease-default);
+}
+.intro-row:hover .intro-row-name::after {
+  transform: scaleX(1);
+}
+
+/* O carimbo gira devagar — e para por inteiro em prefers-reduced-motion,
+   coberto pelo reset global de animação. */
+.seal-spin {
+  animation: seal-rotate 26s linear infinite;
+}
+@keyframes seal-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==========================================================================
+   6. CURSOR
+   O ponteiro é o nativo do sistema. Houve aqui um cursor da casa — anel com
+   arrasto, ponto colado na mão e um clarão em soft-light que fazia a página
+   "olhar" pra onde o ponteiro ia — apagado por decisão de projeto.
+   Só sobra a regra que o navegador não dá de graça: botão é clicável e
+   precisa dizer isso.
+   ========================================================================== */
+
+button:not(:disabled),
+[role="button"] {
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   7. LOADER
+   ========================================================================== */
+
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-coal);
+}
+
+.loader-mark path,
+.loader-mark text {
+  fill: var(--color-gold);
+  stroke: var(--color-gold);
+  fill-opacity: 0;
+}
+
+/* A marca do hero é sólida — o traçado é gesto de loader, não de conteúdo.
+   O <svg> recorta o que sai do viewBox, então a letra sobe de trás de uma
+   máscara sem precisar de wrapper nenhum. */
+.hero-letter {
+  fill: var(--color-cream);
+  will-change: transform;
+}
+
+/* Título de capítulo: nasce em contorno e preenche. Stroke e fill na MESMA
+   cor pra que o preenchimento não pareça um segundo elemento entrando — e na
+   tinta do capítulo, pra continuar legível quando o fundo inverte. */
+.ch-letter {
+  fill: var(--chapter-ink, var(--color-cream));
+  stroke: var(--chapter-ink, var(--color-cream));
+  fill-opacity: 0;
+}
+
+/* O título RESPIRA — 0,8% num ciclo de 7s, com uma sombra que quase não
+   existe. É o que separa "palavra colada" de "palavra pousada". A timeline
+   só mexe na opacidade do wrapper, então o transform daqui não conflita. */
+.ch-title {
+  animation: title-breathe 7s ease-in-out infinite alternate;
+  filter: drop-shadow(0 1rem 2.2rem rgb(0 0 0 / 0.16));
+}
+@keyframes title-breathe {
+  from {
+    transform: scale(1) rotate(-0.12deg);
+  }
+  to {
+    transform: scale(1.008) rotate(0.12deg);
+  }
+}
+
+.footer-letter {
+  fill: var(--color-gold);
+}
+
+.loader-bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: linear-gradient(90deg, #3b2a17, var(--color-gold));
+}
+
+/* ==========================================================================
+   7. ACESSIBILIDADE
+   A referência ignora reduced-motion; aqui não. Sem Lenis, sem pin
+   horizontal, sem grão tremendo — a página vira um documento vertical
+   legível com todo o conteúdo presente.
+   ========================================================================== */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -119,5 +1243,40 @@ h3 {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
+
+  .grain-sheet {
+    animation: none;
+  }
+
+  [data-reveal] .split-char,
+  [data-reveal] .split-word {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .chapter-track {
+    display: block;
+    width: 100%;
+    height: auto;
+    transform: none !important;
+  }
+  .panel,
+  .panel-wide,
+  .panel-media {
+    width: 100%;
+    height: auto;
+    min-height: 100svh;
+  }
+  .media-clip {
+    clip-path: none !important;
+  }
+}
+
+/* Foco visível de verdade — o teclado precisa enxergar onde está. */
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 4px;
+  border-radius: 2px;
 }
