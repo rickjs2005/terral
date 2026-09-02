@@ -163,7 +163,10 @@ export function Intro() {
                     e.preventDefault();
                     scrollToId(chapter.key);
                   }}
-                  className="intro-row group grid grid-cols-[4.2rem_minmax(0,1fr)_auto] items-center gap-[1.6rem] py-[1.55rem]"
+                  // no mobile o rótulo ("A montanha") sai e sobra o ícone: com
+                  // ele, o nome em t-big não cabia e as duas colunas se
+                  // atropelavam ("CAPARAÓ" por cima de "TANHA")
+                  className="intro-row group grid grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-[1.2rem] py-[1.55rem] lg:grid-cols-[4.2rem_minmax(0,1fr)_auto] lg:gap-[1.6rem]"
                   style={{ color: ROW_COLOR[chapter.key] ?? chapter.color.accent }}
                 >
                   <span className="t-big t-nums text-cream/25 transition-colors duration-500 group-hover:text-cream/45">
@@ -174,7 +177,7 @@ export function Intro() {
                     <span aria-hidden className="h-[1.15rem] w-[1.15rem] opacity-80">
                       <ChapterIcon id={chapter.key} />
                     </span>
-                    <span className="t-micro w-[7.5rem] text-cream/40 transition-colors duration-500 group-hover:text-cream/70">
+                    <span className="t-micro hidden w-[7.5rem] text-cream/40 transition-colors duration-500 group-hover:text-cream/70 sm:block">
                       {chapter.kicker}
                     </span>
                   </span>

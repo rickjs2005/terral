@@ -223,7 +223,9 @@ export function Coffees() {
       {COFFEES.map((coffee, index) => (
         <article
           key={coffee.name}
-          className="coffee-stage relative h-[150svh]"
+          // 150svh só onde há parallax pra preencher a folga; no mobile o
+          // GSAP sai cedo e a meia tela extra era rolagem morta
+          className="coffee-stage relative h-[100svh] lg:h-[150svh]"
           style={{ "--chapter-accent": coffee.accent } as React.CSSProperties}
         >
           <h3 className="sr-only">
@@ -256,8 +258,16 @@ export function Coffees() {
               data-reveal="fadeup"
               className="pack-name z-[1]"
               // corpo por comprimento: o nome deve ENCOSTAR nas margens,
-              // nunca estourar — VULCÂNICO tem 9 glifos, NASCENTE 8
-              style={{ color: coffee.accent, fontSize: coffee.name.length > 8 ? "12.6rem" : "14.2rem" }}
+              // nunca estourar — VULCÂNICO tem 9 glifos, NASCENTE 8.
+              // Em variáveis, não em font-size direto: o CSS troca pro corpo
+              // em vw abaixo de 992px (inline venceria a media query).
+              style={
+                {
+                  color: coffee.accent,
+                  "--pn": coffee.name.length > 8 ? "12.6rem" : "14.2rem",
+                  "--pn-m": coffee.name.length > 8 ? "15vw" : "17vw",
+                } as React.CSSProperties
+              }
             >
               {coffee.name}
             </p>
@@ -265,7 +275,7 @@ export function Coffees() {
             {/* sombra de chão — ancora o pacote na mesa do fundo */}
             <div
               aria-hidden
-              className="absolute bottom-[-1svh] left-[36%] z-[1] h-[4.5rem] w-[24rem] -translate-x-1/2 rounded-[50%]"
+              className="absolute top-[57svh] left-1/2 z-[1] h-[3rem] w-[15rem] -translate-x-1/2 rounded-[50%] lg:top-auto lg:bottom-[-1svh] lg:left-[36%] lg:h-[4.5rem] lg:w-[24rem]"
               style={{ background: "radial-gradient(50% 50% at 50% 50%, rgb(0 0 0 / 0.55), transparent 70%)", filter: "blur(8px)" }}
             />
 
@@ -273,7 +283,10 @@ export function Coffees() {
                 exatos em qualquer proporção de tela. O posicionador centra
                 por CSS; o giro do scroll vive num filho (o GSAP sobrescreve
                 transform — camadas separadas ou nada). */}
-            <div className="absolute bottom-[-6svh] left-[36%] z-[2] -translate-x-1/2">
+            {/* Mobile: centrado e a partir de 18svh, cruzando a base do nome;
+                a faixa de leitura fica inteira abaixo dele. Desktop: sangra
+                pelo pé, deslocado à esquerda, com a coluna à direita. */}
+            <div className="absolute top-[18svh] left-1/2 z-[2] -translate-x-1/2 lg:top-auto lg:bottom-[-6svh] lg:left-[36%]">
               <div className="pack-scroll">
                 <div className="pack-float">
                   {/* O pacote é um SUBSTRATO em branco e a tipografia é
@@ -288,7 +301,7 @@ export function Coffees() {
                     <img
                       src="/products/pack.webp"
                       alt={`Embalagem do café ${coffee.name}`}
-                      className="h-[66svh] w-auto"
+                      className="h-[42svh] w-auto lg:h-[66svh]"
                       // luz vem da ESQUERDA nos fundos → sombra cai pra direita
                       style={{ filter: "drop-shadow(1.8rem 1.2rem 2.6rem rgb(0 0 0 / 0.5))" }}
                     />
@@ -347,7 +360,7 @@ export function Coffees() {
 
             {/* kicker — em 9svh ele encostava no N do nome (que agora sobe
                 até 6svh). Sobe pro topo e vira faixa de cabeçalho. */}
-            <p className="t-micro absolute top-[3.4svh] left-[6vw] z-[4] text-cream/60 lg:left-[3.4rem]">
+            <p className="t-micro absolute top-[4.4rem] right-[6vw] left-[6vw] z-[4] text-cream/60 lg:top-[3.4svh] lg:right-auto lg:left-[3.4rem]">
               {coffee.roast} · {coffee.origin} · SCA {coffee.sca}
             </p>
 
@@ -357,7 +370,10 @@ export function Coffees() {
                 nome ocupa de 12svh a ~32svh). A regra da cena é faixa
                 vertical — nome no terço de cima, leitura do meio pra baixo,
                 e as duas nunca se cruzam em nenhuma proporção de tela. */}
-            <div className="absolute top-[40svh] right-[6vw] z-[4] flex w-[24rem] flex-col gap-[1.6rem] lg:right-[3.4rem]">
+            {/* No mobile a coluna vira faixa de pé de tela, largura toda, de
+                ~62svh pra baixo — o pacote termina em 60svh, então os dois
+                nunca se cruzam em nenhuma altura de viewport. */}
+            <div className="absolute inset-x-[6vw] bottom-[3.5svh] z-[4] flex flex-col gap-[1.2rem] lg:inset-x-auto lg:top-[40svh] lg:right-[3.4rem] lg:bottom-auto lg:w-[24rem] lg:gap-[1.6rem]">
               <p className="t-lead text-cream/85">{coffee.body}</p>
 
               <ul className="flex items-stretch">
@@ -380,40 +396,43 @@ export function Coffees() {
                   que o splitter preserva as CLASSES dos filhos, ele troca a
                   marcação por spans inline — e este bloco depende do flex
                   entre o "R$" e o numeral pra alinhar pela base. */}
-              <div className="flex items-start justify-end gap-[1rem]">
-                <span className="t-micro mt-[1.6rem] text-cream/50">R$</span>
-                {/* 13,5rem e não t-mega (24rem): o orçamento vertical da
-                    coluna é de 40svh até a base, e em t-mega o numeral
-                    sozinho comia 24vh a mais do que existe — preço e botão
-                    caíam fora da tela (pego pelo teste de caixa). */}
-                <span
-                  className="t-outline t-nums leading-[0.78]"
-                  style={
-                    {
-                      "--outline": "#d8bc8a",
-                      fontFamily: "var(--font-display)",
-                      fontWeight: 900,
-                      fontSize: "13.5rem",
-                      letterSpacing: "-0.04em",
-                    } as React.CSSProperties
-                  }
-                >
-                  {coffee.price}
-                </span>
-              </div>
+              {/* Mobile: preço e botão na mesma linha, preço à esquerda.
+                  Desktop: coluna alinhada à direita, como antes. */}
+              <div className="flex items-end justify-between gap-[1rem] lg:flex-col lg:items-end lg:gap-[1.6rem]">
+                <div className="flex items-start justify-end gap-[0.6rem] lg:gap-[1rem]">
+                  <span className="t-micro mt-[0.6rem] text-cream/50 lg:mt-[1.6rem]">R$</span>
+                  {/* 13,5rem e não t-mega (24rem): o orçamento vertical da
+                      coluna é de 40svh até a base, e em t-mega o numeral
+                      sozinho comia 24vh a mais do que existe — preço e botão
+                      caíam fora da tela (pego pelo teste de caixa). */}
+                  <span
+                    className="t-outline t-nums text-[4.8rem] leading-[0.78] lg:text-[13.5rem]"
+                    style={
+                      {
+                        "--outline": "#d8bc8a",
+                        fontFamily: "var(--font-display)",
+                        fontWeight: 900,
+                        letterSpacing: "-0.04em",
+                      } as React.CSSProperties
+                    }
+                  >
+                    {coffee.price}
+                  </span>
+                </div>
 
-              <a
-                href={wa(`Olá! Quero pedir o café ${coffee.name} (${coffee.roast}) da TERRAL.`)}
-                target="_blank"
-                rel="noopener noreferrer"
-                data-magnetic
-                className="btn-ghost btn-lux self-end text-cream"
-              >
-                <span>Pedir</span>
-                <span className="btn-arrow" aria-hidden>
-                  →
-                </span>
-              </a>
+                <a
+                  href={wa(`Olá! Quero pedir o café ${coffee.name} (${coffee.roast}) da TERRAL.`)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-magnetic
+                  className="btn-ghost btn-lux text-cream lg:self-end"
+                >
+                  <span>Pedir</span>
+                  <span className="btn-arrow" aria-hidden>
+                    →
+                  </span>
+                </a>
+              </div>
             </div>
 
             {/* PLANO 5 — grãos na frente da lente (os da mesa são REAIS,
@@ -422,18 +441,20 @@ export function Coffees() {
                 faixa de leitura, e um grão borrado por cima de "NOZES"
                 (visto em captura real) não é profundidade, é sujeira. */}
             {/* top 30%: em 16% ele cobria o kicker do canto superior */}
-            <div aria-hidden className="stage-fore absolute z-[5]" style={{ left: "5%", top: "30%", width: "8rem", filter: "blur(9px)", transform: "rotate(-30deg)" }}>
+            {/* Desktop-only: no mobile o pacote é centrado e o grão de 8rem
+                cairia em cima dele — e sem o parallax que o justifica. */}
+            <div aria-hidden className="stage-fore absolute z-[5] hidden lg:block" style={{ left: "5%", top: "30%", width: "8rem", filter: "blur(9px)", transform: "rotate(-30deg)" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/shot/cutout/bean.webp" alt="" loading="lazy" className="w-full" />
             </div>
-            <div aria-hidden className="stage-fore absolute z-[5]" style={{ left: "16%", top: "70%", width: "6rem", filter: "blur(12px)", transform: "rotate(40deg)" }}>
+            <div aria-hidden className="stage-fore absolute z-[5] hidden lg:block" style={{ left: "16%", top: "70%", width: "6rem", filter: "blur(12px)", transform: "rotate(40deg)" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/shot/cutout/bean.webp" alt="" loading="lazy" className="w-full" />
             </div>
 
             {index === 0 && (
               // canto esquerdo: no centro ele caía sobre a embalagem
-              <p aria-hidden className="t-micro absolute bottom-[2.6rem] left-[6vw] z-[4] flex items-center gap-[0.8rem] text-cream/35 lg:left-[3.4rem]">
+              <p aria-hidden className="t-micro absolute bottom-[2.6rem] left-[3.4rem] z-[4] hidden items-center gap-[0.8rem] text-cream/35 lg:flex">
                 Rolar para explorar
                 <span className="block">↓</span>
               </p>

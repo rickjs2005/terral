@@ -383,6 +383,104 @@ function ChapterScene({ chapter }: { chapter: Chapter }) {
   );
 }
 
+/**
+ * O bloco poético da cena, na versão empilhada. No desktop ele vive dentro
+ * da composição de palco (ChapterScene, `hidden lg:block`); aqui ele fecha
+ * o painel de abertura — o glifo do capítulo e duas frases, logo acima do
+ * rótulo do numeral.
+ */
+function ScenePoem({ chapter }: { chapter: Chapter }) {
+  const scene = SCENES[chapter.key];
+  if (!scene) return null;
+  const accent = chapter.color.accent;
+  return (
+    <div aria-hidden className="chm-rise mb-[2rem] max-w-[30ch] lg:hidden">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={accent}
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-[1.2rem] w-[1.2rem]"
+      >
+        {GLYPHS[scene.block.icon].map((d) => (
+          <path key={d} d={d} />
+        ))}
+      </svg>
+      <p className="t-body ink-soft mt-[0.9rem]">{scene.block.copy}</p>
+    </div>
+  );
+}
+
+/**
+ * O corredor de cinema, empilhado. A manchete de três linhas, a parede
+ * aberta em sangria, o corpo que se escreve no scroll e a parede do
+ * processo deslocada pra direita — a mesma sequência do travelling, lida de
+ * cima pra baixo. Tudo `lg:hidden`: no desktop a legenda flutua sobre as
+ * paredes dirigida pela timeline, e as duas versões nunca coexistem.
+ */
+function ChapterMobileEditorial({ chapter }: { chapter: Chapter }) {
+  const { color, images } = chapter;
+  return (
+    <div aria-hidden className="w-full pt-[5rem] pb-[6rem] lg:hidden">
+      <div className="chm-rise">
+        <p className="t-micro ink-soft">
+          {chapter.index} / 05 — {chapter.kicker}
+        </p>
+        <div className="mt-[1.6rem]">
+          {chapter.headline.lines.map((line, i) => (
+            <p
+              key={line}
+              className="chm-head"
+              // sobre o campo de cor (e não sobre foto, como no desktop) a
+              // tinta do capítulo é a régua certa — na Xícara ela é escura
+              style={{ color: i === chapter.headline.hot ? color.accent : "inherit" }}
+            >
+              {line}
+            </p>
+          ))}
+        </div>
+      </div>
+
+      {/* ATO 1 — plano aberto, em sangria */}
+      <figure className="chm-wall chm-rise -mx-[6vw] mt-[3.2rem] aspect-[4/5]">
+        <Image
+          src={images.cluster[chapter.wall.wide]}
+          alt={images.alt.cluster[chapter.wall.wide]}
+          fill
+          sizes="100vw"
+          className="object-cover"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to top, rgb(0 0 0 / 0.5) 0%, rgb(0 0 0 / 0.1) 40%, transparent 65%)",
+          }}
+        />
+      </figure>
+
+      <p className="t-lead ink mt-[2.6rem] max-w-[32ch]" data-reveal="write">
+        {chapter.lead}
+      </p>
+
+      {/* ATO 2 — o processo, deslocado: a assimetria é o que impede a
+          sequência de virar galeria */}
+      <figure className="chm-wall chm-rise mt-[3.2rem] ml-[14vw] -mr-[6vw] aspect-[3/4]">
+        <Image
+          src={images.cluster[chapter.wall.mid]}
+          alt={images.alt.cluster[chapter.wall.mid]}
+          fill
+          sizes="86vw"
+          className="object-cover"
+        />
+      </figure>
+    </div>
+  );
+}
+
 export function ChapterSection({ chapter, first }: { chapter: Chapter; first?: boolean }) {
   const root = useRef<HTMLElement>(null);
   const [titleReady, setTitleReady] = useState(false);
@@ -433,6 +531,38 @@ export function ChapterSection({ chapter, first }: { chapter: Chapter; first?: b
         // a legenda do travelling não existe empilhada (é `hidden lg:block`),
         // mas sem movimento no desktop ela precisa nascer visível
         gsap.set([...q(".ch-headline"), ...q(".ch-leadbox")], { opacity: 1 });
+
+        if (!reduce) {
+          // Os blocos da versão empilhada sobem uma vez ao entrar — o único
+          // gesto de entrada do capítulo no mobile, barato e sem scrub.
+          for (const el of q(".chm-rise")) {
+            gsap.fromTo(
+              el,
+              { y: 28, opacity: 0 },
+              {
+                y: 0,
+                opacity: 1,
+                duration: 1.1,
+                ease: "power3.out",
+                scrollTrigger: { trigger: el, start: "top 88%", once: true },
+              },
+            );
+          }
+
+          // Sem pin não há timeline pra tingir a nav — sem isto ela ficava
+          // creme por cima do campo creme da Xícara.
+          const nextColor = CHAPTERS[at + 1]?.color.nav ?? NEUTRAL_NAV;
+          const prevColor = CHAPTERS[at - 1]?.color.nav ?? NEUTRAL_NAV;
+          ScrollTrigger.create({
+            trigger: section,
+            start: "top 3rem",
+            end: "bottom 3rem",
+            onEnter: () => setNavColor(chapter.color.nav, chapter.key),
+            onEnterBack: () => setNavColor(chapter.color.nav, chapter.key),
+            onLeave: () => setNavColor(nextColor, CHAPTERS[at + 1]?.key ?? null),
+            onLeaveBack: () => setNavColor(prevColor, CHAPTERS[at - 1]?.key ?? null),
+          });
+        }
 
         // Sem movimento: fica no poster. Movimento é justamente o que a
         // pessoa pediu pra não ter.
@@ -820,7 +950,8 @@ export function ChapterSection({ chapter, first }: { chapter: Chapter; first?: b
 
       <div className="chapter-track">
         {/* ============ PAINEL 1 — abertura ============ */}
-        <div className="panel flex flex-col justify-between p-[6vw] lg:p-[3.4rem]">
+        {/* pt maior no mobile: a nav fixa (≈4rem) cobria o kicker do capítulo */}
+        <div className="panel flex flex-col justify-between p-[6vw] pt-[5rem] lg:p-[3.4rem]">
           {/* A poeira do capítulo — seis motes na cor do acento, subindo.
               CSS puro; morre sozinha em prefers-reduced-motion. */}
           {[
@@ -895,8 +1026,10 @@ export function ChapterSection({ chapter, first }: { chapter: Chapter; first?: b
 
           <ChapterScene chapter={chapter} />
 
-          <div className="flex items-end justify-between gap-8">
-            <p className="ch-hero-label t-micro ink-soft max-w-[16rem]">
+          <div>
+            <ScenePoem chapter={chapter} />
+            <div className="flex items-end justify-between gap-8">
+              <p className="ch-hero-label t-micro ink-soft max-w-[16rem]">
               {/* o VALOR faz parte do rótulo — "Água na extração · 92 °C".
                   Sem ele, o capítulo que esconde o numeral gigante (XÍCARA)
                   ficava com um rótulo órfão: "· °C" de coisa nenhuma. */}
@@ -904,8 +1037,9 @@ export function ChapterSection({ chapter, first }: { chapter: Chapter; first?: b
               {/* normal-case no filho vence o uppercase do pai — sem isso o
                   µ de "µm" vira Μ grego maiúsculo e o rótulo lê "600 MM" */}
               {hero.unit ? <span className="normal-case"> {hero.unit}</span> : null}
-            </p>
-            <p className="t-micro ink-faint hidden lg:block">Role →</p>
+              </p>
+              <p className="t-micro ink-faint hidden lg:block">Role →</p>
+            </div>
           </div>
         </div>
 
@@ -916,7 +1050,10 @@ export function ChapterSection({ chapter, first }: { chapter: Chapter; first?: b
             (contexto) → plano do processo (gente) → sangria em movimento.
             O trilho horizontal é o travelling entre eles. */}
         <div className="panel panel-wide flex items-stretch gap-[6vw] px-[6vw]">
-          <div className="ch-cluster flex h-full items-stretch gap-[6vw]">
+          {/* Só no desktop: empilhado, o cluster nascia com 0px de largura
+              (só tem imagens `fill`, sem largura própria) e as duas paredes
+              simplesmente não existiam. A versão de leitura vem logo abaixo. */}
+          <div className="ch-cluster hidden h-full items-stretch gap-[6vw] lg:flex">
             {/* ATO 1 — plano aberto, com a manchete de três linhas */}
             <figure className="ch-tile ch-wall w-[80vw]">
               <Image
@@ -955,6 +1092,8 @@ export function ChapterSection({ chapter, first }: { chapter: Chapter; first?: b
               />
             </figure>
           </div>
+
+          <ChapterMobileEditorial chapter={chapter} />
         </div>
 
         {/* ============ PAINEL 3 — mídia em sangria ============ */}
@@ -993,6 +1132,39 @@ export function ChapterSection({ chapter, first }: { chapter: Chapter; first?: b
             />
           </div>
 
+          {/* Legenda e dados da versão empilhada: no desktop eles vivem fora
+              da faixa, presos à tela, e são `hidden lg:block`. Aqui a foto é
+              a tela inteira, então cabem nela — legenda no alto, os três
+              dados em lista sobre o degradê do pé. */}
+          <div
+            aria-hidden
+            className="absolute inset-0 z-[2] flex flex-col justify-between p-[6vw] pt-[6rem] lg:hidden"
+          >
+            <p className="chm-rise t-cap max-w-[26ch] text-cream/85">{chapter.caption}</p>
+            <ul className="chm-rise">
+              {stats.map((stat) => (
+                <li
+                  key={stat.label}
+                  className="flex items-baseline justify-between gap-[1rem] border-t border-cream/20 py-[0.8rem]"
+                >
+                  <p className="t-micro text-cream/70">{stat.label}</p>
+                  <p className="flex items-baseline gap-[0.35rem]">
+                    <span
+                      className="chm-num t-outline t-nums"
+                      style={{ "--outline": color.accent } as React.CSSProperties}
+                    >
+                      {stat.value}
+                    </span>
+                    {stat.unit && (
+                      <span className="t-big normal-case" style={{ color: color.accent }}>
+                        {stat.unit}
+                      </span>
+                    )}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
 

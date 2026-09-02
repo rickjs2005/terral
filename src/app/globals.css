@@ -634,15 +634,33 @@ h4 {
   will-change: transform;
 }
 
-@media (max-width: 991px) {
-  .ch-cluster {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .ch-wall {
-    width: 100% !important;
-    height: 64vw;
-  }
+/* ==========================================================================
+   O CAPÍTULO EMPILHADO (mobile)
+   Abaixo de 992px a faixa horizontal não existe — e a composição de palco
+   (cena, legenda do travelling, dados sobre a foto) é `hidden lg:block`.
+   Empilhar os três painéis sem ela deixava duas telas de cor chapada e
+   vazia por capítulo (visto em captura real). As classes .chm-* são a
+   versão de LEITURA do mesmo conteúdo: manchete de cinema, parede de foto,
+   corpo, segunda parede, e os dados em lista sobre a mídia. Mesmo material,
+   outro veículo — não um degrade.
+   ========================================================================== */
+.chm-head {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 14vw; /* a linha mais longa da casa tem 12 glifos → cabe em 88vw */
+  line-height: 0.86;
+  letter-spacing: -0.035em;
+}
+.chm-wall {
+  position: relative;
+  overflow: hidden;
+}
+.chm-num {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 3.4rem;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
 }
 
 /* ==========================================================================
@@ -870,6 +888,11 @@ h4 {
     height: auto;
     min-height: 100svh;
   }
+  /* o corredor empilhado tem a altura do próprio conteúdo — o `min-height`
+     de 100svh era o que fabricava a tela de cor vazia */
+  .panel-wide {
+    min-height: 0;
+  }
   .media-clip {
     clip-path: none;
   }
@@ -930,7 +953,7 @@ h4 {
   text-align: center;
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 15.5rem;
+  font-size: var(--pn, 15.5rem);
   line-height: 0.8;
   letter-spacing: -0.04em;
   white-space: nowrap;
@@ -938,6 +961,17 @@ h4 {
 }
 .pack-name-front {
   clip-path: inset(42% -6% -6% -6%);
+}
+
+/* Empilhado: corpo em vw (via --pn-m, definido pelo comprimento do nome no
+   componente) e mais baixo, pra cruzar a base do pacote — que no mobile é
+   centrado e começa em 18svh. Tem que vir DEPOIS da regra base: mesma
+   especificidade, e a media query só vence pela ordem. */
+@media (max-width: 991px) {
+  .pack-name {
+    top: 14svh; /* abaixo do kicker de duas linhas, que começa em 4.4rem */
+    font-size: var(--pn-m, 17vw);
+  }
 }
 
 /* A embalagem flutua — loop de 8s, amplitude mínima. "Parada" é o que
