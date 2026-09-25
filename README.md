@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TERRAL — da montanha à xícara
 
-## Getting Started
+Experiência web sobre o universo do café, criada como projeto conceitual de portfólio da [MilWeb](https://milweb.com.br). A marca e os dados comerciais são ilustrativos.
 
-First, run the development server:
+[Ver demonstração](https://terral-delta.vercel.app/) · [Portfólio MilWeb](https://milweb.com.br)
+
+![Cena do capítulo Caparaó](public/shot/caparao/full.webp)
+
+## A experiência
+
+Uma página contínua apresenta cinco capítulos — **Caparaó, Terreiro, Tambor, Moenda e Xícara** — com navegação, manifesto, catálogo de cafés e rodapé.
+
+O foco técnico está na combinação de conteúdo editorial, mídia e animação ligada à rolagem. Os capítulos usam painéis horizontais, vídeos com imagens de abertura e uma identidade de cor própria para cada etapa.
+
+## Stack
+
+- Next.js 16.2.11, React 19 e TypeScript.
+- Tailwind CSS 4.
+- GSAP, ScrollTrigger e Lenis.
+- Three.js, React Three Fiber e drei.
+
+As versões completas e os scripts estão em [package.json](package.json).
+
+## Rodar localmente
 
 ```bash
+git clone https://github.com/rickjs2005/terral.git
+cd terral
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Comando | Uso |
+|---|---|
+| `npm run dev` | Desenvolvimento |
+| `npm run build` | Build de produção |
+| `npm run start` | Servir o build |
+| `npm run lint` | Análise estática com ESLint |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Estrutura
 
-## Learn More
+- `src/app/page.tsx`: composição da página.
+- `src/components/`: navegação, hero, capítulos, cafés e rodapé.
+- `src/lib/chapters.ts`: textos, cores, indicadores e caminhos de mídia dos cinco capítulos.
+- `public/shot/`: imagens e vídeos usados na experiência.
 
-To learn more about Next.js, take a look at the following resources:
+## Escopo
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Este repositório demonstra uma experiência de marca; não representa uma operação real de torrefação ou uma entrega contratada. Os números e produtos apresentados fazem parte do conceito.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Os vídeos em `public/shot/` são referenciados pelos capítulos e fazem parte da aplicação. Logs locais e arquivos temporários de auditoria não devem ser versionados.
