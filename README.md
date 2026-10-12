@@ -1,53 +1,77 @@
-# TERRAL — da montanha à xícara
+# TERRAL — from the mountain to the cup
 
-Experiência web sobre o universo do café, criada como projeto conceitual de portfólio da [MilWeb](https://milweb.com.br). A marca e os dados comerciais são ilustrativos.
+[Português](README.pt-BR.md) · [English](README.md)
 
-[Ver demonstração](https://terral-delta.vercel.app/) · [Portfólio MilWeb](https://milweb.com.br)
+A scroll-driven web experience about specialty coffee, built as a concept portfolio project by [MilWeb](https://milweb.com.br). TERRAL is a **fictional brand**: the roastery, address, products, prices and numbers shown on the site are illustrative.
 
-![Cena do capítulo Caparaó](public/shot/caparao/full.webp)
+> **Type:** concept (portfolio) · **Demo:** [terral-cafe.vercel.app](https://terral-cafe.vercel.app)
 
-## A experiência
+![TERRAL home with the 3D coffee bean](docs/screenshots/home.webp)
 
-Uma página contínua apresenta cinco capítulos — **Caparaó, Terreiro, Tambor, Moenda e Xícara** — com navegação, manifesto, catálogo de cafés e rodapé.
+## What the site does
 
-O foco técnico está na combinação de conteúdo editorial, mídia e animação ligada à rolagem. Os capítulos usam painéis horizontais, vídeos com imagens de abertura e uma identidade de cor própria para cada etapa.
+- **Hero with a 3D coffee bean** rendered in real time with Three.js / React Three Fiber (procedural geometry and custom shaders), with a loading screen.
+- **Five chapters** — Caparaó, Terreiro, Tambor, Moenda and Xícara — each a pinned horizontal panel driven by scroll (GSAP ScrollTrigger + Lenis), with its own colour, stats, photos and a short looping video.
+- **Coffee showcase** with three illustrative blends (Nascente, Vertente, Vulcânico) and a subscription club; "order" buttons open a pre-filled WhatsApp message.
+- **Hidden page** (`/casa-do-torrador`): holding the footer button for six seconds unlocks it; it is not indexed.
+- Custom 404 page, magnetic buttons, and a separate mobile layout.
+
+![Coffee showcase](docs/screenshots/coffees.webp)
 
 ## Stack
 
-- Next.js 16.2.11, React 19 e TypeScript.
-- Tailwind CSS 4.
-- GSAP, ScrollTrigger e Lenis.
-- Three.js, React Three Fiber e drei.
+- Next.js 16.3 (App Router), React 19.2 and TypeScript
+- Tailwind CSS 4
+- GSAP (+ ScrollTrigger, `@gsap/react`) and Lenis
+- Three.js, React Three Fiber and drei
 
-As versões completas e os scripts estão em [package.json](package.json).
+Exact versions are in [package.json](package.json).
 
-## Rodar localmente
+## Running locally
+
+Requirements: Node.js 20.9+ (CI uses Node 22) and pnpm 10.
 
 ```bash
 git clone https://github.com/rickjs2005/terral.git
 cd terral
-npm ci
-npm run dev
+pnpm install --frozen-lockfile
+pnpm dev
 ```
 
-Abra http://localhost:3000.
+Open http://localhost:3000. No environment variables are required.
 
-| Comando | Uso |
+| Command | Purpose |
 |---|---|
-| `npm run dev` | Desenvolvimento |
-| `npm run build` | Build de produção |
-| `npm run start` | Servir o build |
-| `npm run lint` | Análise estática com ESLint |
+| `pnpm dev` | Development server |
+| `pnpm build` | Production build |
+| `pnpm start` | Serve the production build |
+| `pnpm lint` | ESLint |
 
-## Estrutura
+## Structure
 
-- `src/app/page.tsx`: composição da página.
-- `src/components/`: navegação, hero, capítulos, cafés e rodapé.
-- `src/lib/chapters.ts`: textos, cores, indicadores e caminhos de mídia dos cinco capítulos.
-- `public/shot/`: imagens e vídeos usados na experiência.
+- `src/app/` — home page, `/casa-do-torrador`, 404 and root layout (fonts, metadata).
+- `src/components/` — nav, hero and 3D scene, intro/manifesto, chapters, coffees and footer.
+- `src/lib/chapters.ts` — texts, colours, stats and media paths of the five chapters.
+- `src/lib/` — bean geometry, scroll and animation helpers.
+- `public/shot/` — chapter photos, cut-outs and videos; `public/products/` — product images.
+- `docs/screenshots/` — images used in this README.
 
-## Escopo
+## Limitations
 
-Este repositório demonstra uma experiência de marca; não representa uma operação real de torrefação ou uma entrega contratada. Os números e produtos apresentados fazem parte do conceito.
+- Concept site only: there is no checkout, backend or real stock. The WhatsApp buttons point to MilWeb's business number, not to a real roastery.
+- Content is in Brazilian Portuguese only.
+- There are no automated tests; CI runs lint and the production build.
 
-Os vídeos em `public/shot/` são referenciados pelos capítulos e fazem parte da aplicação. Logs locais e arquivos temporários de auditoria não devem ser versionados.
+## Media credits
+
+- Product package photos were generated with an AI image tool (Higgsfield), according to the project's commit history.
+- The origin of the chapter photos, cut-outs and videos in `public/shot/` is not documented.
+- `public/draco/` holds a copy of the Google Draco decoder (third-party) and `public/model/bean.glb` a 3D model; neither is loaded by the current code, since the hero bean is generated procedurally.
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for how to report a vulnerability.
+
+## License
+
+No license has been chosen yet; all rights reserved by the author.
